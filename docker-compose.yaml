@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: werise_user
+      POSTGRES_PASSWORD: werise_pass
+      POSTGRES_DB: werise
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  
+volumes:
+  data:

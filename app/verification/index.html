@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WeRise | Telegram bot Verification Center!</title>
+    <script src="/static/telegram-passport.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="https://t.me/werisebot">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Telegram_2019_Logo.svg" alt="We Rise Logo"
+                    width="100" height="100">
+                WeRise Bot
+            </a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">
+                Welcome to Verification Center
+            </h1>
+            <br />
+            <!--  Loading state  -->
+            <progress class="progress is-small is-primary" max="100" id="loading">15%</progress>
+
+            <!--  Success  -->
+            <div style="display: none;" id="success">
+                <h4 class="title is-4" id="user"> </h4>
+
+                <p class="subtitle my-1">
+                    Please click the button below to verify your identity
+                </p>
+            </div>
+
+            <!-- Error  -->
+            <div class="notification is-danger" id="error" style="display: none;">
+                Please go back to Telegram App and click the button again
+            </div>
+            <article class="message is-info mt-1" id="message">
+                <div class="message-header">
+                    <p>IMPORTANT!</p>
+                    <button class="delete" aria-label="delete"></button>
+                </div>
+                <div class="message-body">
+                    <p>1. Please prepare your ID Card, Passport, or Driver License</p>
+                    <p>2. Please prepare your Proof of Address ex. Utility Bill, Bank Statement, Rental Agreement, etc.
+                    </p>
+                    <p>3. You will be asked to take a selfie with your ID Card, Passport, or Driver License</p>
+                    <br>
+                    <p>When you are ready, please click the button below</p>
+                </div>
+            </article>
+            <!-- <a class="button is-dark" id="verify" style="display: none;">Verify</a> -->
+            <div id="telegram_passport_auth"></div>
+        </div>
+    </section>
+    <script src="/static/tg.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            (document.querySelectorAll('.delete') || []).forEach(($delete) => {
+                $notification = $delete.parentNode;
+                $delete.addEventListener('click', () => {
+                    $notification.closest('.message').remove();
+                });
+
+            });
+        });
+
+        async function getPassportData() {
+            const verifyUrl = '/telegram/passport-data'
+            // get the tokn from the url as last part
+            const url = window.location.pathname.split('/')
+            const token = url[url.length - 1]
+
+            const data = {
+                token: token
+            }
+            const response = await fetch(verifyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data),
+            })
+            const result = await response.json()
+            if (response.status == 200) {
+                return result
+            }
+
+            return null
+        }
+        getPassportData().then((result) => {
+            result.public_key = public_key
+            console.log(result)
+            Telegram.Passport.createAuthButton('telegram_passport_auth', result, {
+                text: 'Verify your identity',
+                radius: 6,
+            })
+            document.getElementById('loading').style.display = 'none'
+        })
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+</body>
+
+</html>
